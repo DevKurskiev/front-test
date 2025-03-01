@@ -4,7 +4,7 @@ import api from '../services/api';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: { username: string, role?: 'buyer' | 'seller' | 'admin', userId?: number } | null;
+  user: { username: string, role?: 'buyer' | 'seller' | 'admin', userId?: number, verified?: boolean } | null;
   login: (accessToken: string, refreshToken: string, user: any) => void;
   logout: () => void;
   isLoading: boolean;

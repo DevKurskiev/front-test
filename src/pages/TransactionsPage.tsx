@@ -29,7 +29,7 @@ const TransactionsPage: React.FC = () => {
     setLoading(true);
     try {
       // Проверяем, если нет сортировки, то используем значения по умолчанию
-      const response = await api.get('/transactions', {
+      const response = await api.get('/transactions/user', {
         params: {
           page,
           limit: pagination.pageSize,

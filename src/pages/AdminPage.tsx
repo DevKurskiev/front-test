@@ -58,7 +58,7 @@ const AdminPage: React.FC = () => {
     if (!editingUser) return;
     try {
       setLoading(true);
-      await api.put(`/users/${editingUser.id}`, {...editingUser, role: "admin"}); // Патч запроса для обновления пользователя
+      await api.put(`/users/${editingUser.id}`, editingUser); // Патч запроса для обновления пользователя
       notification.success({ message: 'Данные пользователя обновлены' });
       setUsers((prevUsers) =>
         prevUsers.map((user) => (user.id === editingUser.id ? editingUser : user))

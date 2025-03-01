@@ -56,10 +56,20 @@ const OrdersPage: React.FC = () => {
   };
 
   const handleEditClick = (order: any) => {
-    setSelectedOrder(order);
-    editForm.setFieldsValue(order);
+    // Создаём копию ордера
+    let adjustedOrder = { ...order, amount: +order.amount - +order.reservedAmount };
+  
+    // Корректируем курс перед отображением в модалке
+    if (order.operationType === 'sell' && order.currencyPair === 'USD/RUB') {
+      adjustedOrder.price = +order.price - 0.5; // Убираем 0.5 рубля
+    } else if (order.operationType === 'sell' && order.currencyPair === 'RUB/USD') {
+      adjustedOrder.price = +order.price + 0.5; // Возвращаем 0.5 рубля
+    }
+  
+    setSelectedOrder(adjustedOrder); // Устанавливаем корректные данные
+    editForm.setFieldsValue(adjustedOrder); // Заполняем форму без скрытых изменений
     setEditModalVisible(true);
-  };
+  };  
   
   const handleDeleteClick = async (order: any) => {
     await api.delete(`/orders/${order.id}`);
@@ -139,10 +149,23 @@ const OrdersPage: React.FC = () => {
       dataIndex: 'price',
       key: 'price',
       sorter: (a: any, b: any) => a.price - b.price,
-      render: (_: any, record: any) => (
-        <p>{record.seller.id === user?.userId ? record.price - 0.5 : record.price}</p>
-      )
-    },    
+      render: (_: any, record: any) => {
+        let adjustedPrice = +record.price;
+
+          // Коррекция курса в зависимости от валютной пары и типа операции
+          if (record.seller.id === user?.userId) {
+            if (record.operationType === 'sell' && record.currencyPair === 'USD/RUB') {
+              adjustedPrice -= 0.5; // Продавец продаёт доллар → убираем 0.5 рубля
+            } else if (record.operationType === 'sell' && record.currencyPair === 'RUB/USD') {
+              console.log("adjustedPrice", adjustedPrice)
+              adjustedPrice += 0.5; // Продавец продаёт рубль → добавляем 0.5 рубля
+              console.log("adjustedPrice-2", adjustedPrice)
+            }
+          }
+
+          return <p>{adjustedPrice}</p>;
+      }
+    },
     {
       title: 'Продавец',
       dataIndex: ['seller', 'username'],
@@ -154,7 +177,7 @@ const OrdersPage: React.FC = () => {
       key: 'actions',
       render: (_: any, record: any) => (
         <div style={{ display: 'flex', gap: '8px' }}>
-          {user?.role === 'buyer' && (
+          {user?.role === 'buyer' && user?.verified && (
               <Button type="primary" onClick={() => handleShowConfirmModal(record)}>
                 Купить
               </Button>
@@ -172,7 +195,7 @@ const OrdersPage: React.FC = () => {
 
   return (
     <div>
-      {user?.role === 'seller' && (
+      {user?.role === 'seller' && user?.verified && (
         <Button type="primary" onClick={() => setModalVisible(true)} style={{ marginBottom: 16 }}>
           Создать ордер
         </Button>

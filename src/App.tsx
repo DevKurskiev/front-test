@@ -44,7 +44,7 @@ function App() {
           </Route>
         </Routes>
       </Content>
-      <SupportFooter />
+      {window.location.pathname !== "/admin" && <SupportFooter />}
     </Layout>
   );
 }
